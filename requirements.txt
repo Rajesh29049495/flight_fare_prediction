@@ -19,5 +19,5 @@ numpy
 scikit-learn
 apache-airflow
 ipykernel
-#-e .
+-e .
 openpyxl
