@@ -16,4 +16,3 @@ env_var = EnvironmentVariable()                            ##object of Environme
 mongo_client = pymongo.MongoClient(env_var.mongo_db_url)   ##now i don't have to create mongoclient again and again, simply will use it from here
 
 
-TARGET_COLUMN = "Price"
