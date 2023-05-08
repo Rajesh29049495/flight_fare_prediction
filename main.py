@@ -3,7 +3,7 @@ from ffp.pipeline.batch_prediction import start_batch_prediction
 from ffp.exception import ffpException
 import sys
 
-file_path = "/config/workspace/input_file.xlsx"
+file_path = "/config/workspace/input_files/input_file.xlsx"
 print(__name__)
 if __name__=="__main__":
      try:
