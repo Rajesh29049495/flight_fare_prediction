@@ -21,3 +21,4 @@ apache-airflow
 ipykernel
 -e .
 openpyxl
+Flask-Cors
