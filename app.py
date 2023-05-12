@@ -16,17 +16,16 @@ import pickle
 app = Flask(__name__)
 
 logging.info(f"Loading latest model from saved_models")
-latest_dir = ModelResolver().get_latest_dir_path()
 
-model_path= os.path.join(latest_dir,"model",config_entity.MODEL_FILE_NAME)
-flight_model = utils.load_object(file_path=model_path)
+latest_dir = ModelResolver().get_latest_dir_path()
+flight_model = utils.load_object(file_path=os.path.join(latest_dir,"model",config_entity.MODEL_FILE_NAME))
 
 logging.info(f"Loading Latest trasnformers from saved_models folder!!")
 
-Airline_path = os.path.join(latest_dir,"transformer",config_entity.Airline_TRANSFORMER_OBJECT_FILE_NAME)
-Source_Destination_path = os.path.join(latest_dir,"transformer",config_entity.Source_Destination_TRANSFORMER_OBJECT_FILE_NAME)
-Total_Stops_path = os.path.join(latest_dir,"transformer",config_entity.Total_Stops_TRANSFORMER_OBJECT_FILE_NAME)
-Additional_Info_path = os.path.join(latest_dir,"transformer",config_entity.Additional_Info_TRANSFORMER_OBJECT_FILE_NAME)
+Airline_path = os.path.join(ModelResolver().get_latest_dir_path(),"transformer",config_entity.Airline_TRANSFORMER_OBJECT_FILE_NAME)
+Source_Destination_path = os.path.join(ModelResolver().get_latest_dir_path(),"transformer",config_entity.Source_Destination_TRANSFORMER_OBJECT_FILE_NAME)
+Total_Stops_path = os.path.join(ModelResolver().get_latest_dir_path(),"transformer",config_entity.Total_Stops_TRANSFORMER_OBJECT_FILE_NAME)
+Additional_Info_path = os.path.join(ModelResolver().get_latest_dir_path(),"transformer",config_entity.Additional_Info_TRANSFORMER_OBJECT_FILE_NAME)
 #reset_cols_path = os.path.join(latest_dir,"transformer",config_entity.reset_cols_TRANSFORMER_OBJECT_FILE_NAME)
 
 
@@ -63,8 +62,8 @@ def predict_api():
 
             filtered_data.append(data[0].split('T')[0].split('-')[2])   ##departure 'date'
             filtered_data.append(data[0].split('T')[0].split('-')[1])   ##departure 'month'
-            filtered_data.append(data[0].split('T')[1].split('-')[0])   ##'Dep_Time_hour'
-            filtered_data.append(data[0].split('T')[1].split('-')[1])   ##'Dep_Time_min'
+            filtered_data.append(data[0].split('T')[1].split(':')[0])   ##'Dep_Time_hour'
+            filtered_data.append(data[0].split('T')[1].split(':')[1])   ##'Dep_Time_min'
             filtered_data.append(data[1].split(':')[0])                  ##'Arrival_Time_hour'
             filtered_data.append(data[1].split(':')[1])                  ##'Arrival_Time_min'
             filtered_data.append(duration_h)                             ##'Duration hour'
@@ -102,8 +101,25 @@ def predict_api():
 if __name__=="__main__":
     try:
         #app.run(debug=True)                ##in some cases, depending on our operating system an dnetwork configuration, 'debug = True' may prevent external clienets from connecting to teh server , in which case using 'host="0.0.0.0" instead may resolve the issue.
-        app.run(host="0.0.0.0", port = 8000)
+        app.run(host="0.0.0.0")
         #app.run(host="0.0.0.0", port=8000)
 
     except Exception as e:
        raise ffpException(e, sys)
+
+
+"""
+NOTE: As this flask app is running on a remote server or virtual machine provided by my coaching website. so to access this flask app , i need to use the URL of that 
+server or virtual machine where this app is running. 
+As i have built this app on a VS Code instance which is hosted on teh website `https://white-musician-uflwx.ineuron.app/?folder=/config/workspace`. This means my app is 
+running on that VS Code instance, whic is not  my local machine. So i need to access my app using the URL of that VS Code instance.
+Hence i used `https://white-musician-uflwx.ineuron.app:5000` to run teh app ceated by me after running the app.py file. This URL will tell my web browser to access teh 
+Flassk app running on teh VS Code instance using port 5000, which is default port used by Flask apps.  
+Summary: the `http://localhost:5000` didn't work beaacuse my flask app is not running on my local machine, but on a remote server or virtula machine provided by ineuron. 
+To acces teh app, i need to use the URL of that renote sever or virtul machine , and add `:5000` at teh end to specify teh port number.
+
+Also note that when we run flask app , it start a web server that listens for incoming requests on a specific host and port. By default teh Flask development server 
+listens only on teh localhost interface(127.0.0.1) and is not accessible from other machines. So if we want to access the flask app from other machine or from a remote server,
+we need to set the host parameter tp "0.0.0.0" so that it listens on all available network interfaces. This makes our flaks app accessible to any machine that can reach the network address of teh machine running the flaks app.
+Hence i used `app.run(host="0.0.0.0")`, this makes my flask app listes om all availabel network interfaces, which allows it to be accessed remotely.
+"""
