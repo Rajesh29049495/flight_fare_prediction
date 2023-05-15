@@ -11,3 +11,4 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - MONGO_DB_URL=${MONGO_DB_URL}
       - BUCKET_NAME=${BUCKET_NAME}
+    command: /bin/sh -c "python3 API.py"         ##the `command` field in teh Docker Compose file is used to specify th ecommand that is executed when the container starts up. the command is /bin/sh -c "python3 API.py", which means that when the container starts, it will run the command python3 API.py within the shell. By specifying the command in the Docker Compose file, you can ensure that the container runs the desired command when it starts up.

@@ -114,7 +114,7 @@ server or virtual machine where this app is running.
 As i have built this app on a VS Code instance which is hosted on teh website `https://white-musician-uflwx.ineuron.app/?folder=/config/workspace`. This means my app is 
 running on that VS Code instance, whic is not  my local machine. So i need to access my app using the URL of that VS Code instance.
 Hence i used `https://white-musician-uflwx.ineuron.app:5000` to run teh app ceated by me after running the app.py file. This URL will tell my web browser to access teh 
-Flassk app running on teh VS Code instance using port 5000, which is default port used by Flask apps.  
+Flask app running on teh VS Code instance using port 5000, which is default port used by Flask apps.  
 Summary: the `http://localhost:5000` didn't work beaacuse my flask app is not running on my local machine, but on a remote server or virtula machine provided by ineuron. 
 To acces teh app, i need to use the URL of that renote sever or virtul machine , and add `:5000` at teh end to specify teh port number.
 
