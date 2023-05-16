@@ -23,8 +23,8 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         with:
+          region: ${{ secrets.AWS_REGION }}
           registry: ${{ secrets.AWS_ECR_LOGIN_SERVER }}
-          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Build and Push API Docker Image
         env:
@@ -42,7 +42,10 @@ jobs:
 
   run-api-on-instance:
     needs: build-and-push-ecr-images
-    runs-on: self-hosted
+    runs-on: self-hosted-api
+    env:
+      AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
+      AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -74,6 +77,9 @@ jobs:
   run-tb-on-instance:
     needs: build-and-push-ecr-images
     runs-on: self-hosted
+    env:
+      AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
+      AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
