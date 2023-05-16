@@ -5,19 +5,16 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-push-ecr-images:
     runs-on: ubuntu-latest
     env:
-      ECR_REPOSITORY_NAME_API: ffp_api
-      ECR_REPOSITORY_NAME_TB: flight_fare_prediction
-      AWS_DEFAULT_REGION: ap-south-1
-      AWS_ACCOUNT_ID: 206545088951
-      AWS_ECR_LOGIN_SERVER: 206545088951.dkr.ecr.ap-south-1.amazonaws.com
-      AWS_ECR_LOGIN_URI_API: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_API }}
-      AWS_ECR_LOGIN_URI_TB: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_TB }}
-      INSTANCE_API_IP: 3.111.23.154
-      INSTANCE_TB_IP: 13.232.56.72
+      AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
+      AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -26,22 +23,22 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         with:
-          registry: ${{ env.AWS_ECR_LOGIN_SERVER }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          registry: ${{ secrets.AWS_ECR_LOGIN_SERVER }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Build and Push API Docker Image
         env:
           IMAGE_TAG: latest
         run: |
-          docker build -t ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }} -f Dockerfile.API .
-          docker push ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }}
+          docker build -t ${{ env.AWS_ECR_LOGIN_URI_API }}:$IMAGE_TAG -f Dockerfile.API .
+          docker push ${{ env.AWS_ECR_LOGIN_URI_API }}:$IMAGE_TAG
 
       - name: Build and Push TB Docker Image
         env:
           IMAGE_TAG: latest
         run: |
-          docker build -t ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }} -f Dockerfile.TB .
-          docker push ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }}
+          docker build -t ${{ env.AWS_ECR_LOGIN_URI_TB }}:$IMAGE_TAG -f Dockerfile.TB .
+          docker push ${{ env.AWS_ECR_LOGIN_URI_TB }}:$IMAGE_TAG
 
   run-api-on-instance:
     needs: build-and-push-ecr-images
@@ -64,7 +61,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Pull API Docker Image
         run: |
@@ -95,7 +92,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Pull TB Docker Image
         run: |
