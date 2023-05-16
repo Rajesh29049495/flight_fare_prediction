@@ -1,14 +1,28 @@
-version: "2"
-services:        
- application:
-    image: ${IMAGE_NAME}   
-    container_name: sensor
-    ports:
-      - "8080:8080"
+version: "3.9"
+services:
+  tb:
+    build:
+      context: .
+      dockerfile: Dockerfile.tb
+    container_name: tb_container
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - MONGO_DB_URL=${MONGO_DB_URL}
       - BUCKET_NAME=${BUCKET_NAME}
-    command: /bin/sh -c "python3 API.py"         ##the `command` field in teh Docker Compose file is used to specify th ecommand that is executed when the container starts up. the command is /bin/sh -c "python3 API.py", which means that when the container starts, it will run the command python3 API.py within the shell. By specifying the command in the Docker Compose file, you can ensure that the container runs the desired command when it starts up.
+    volumes:
+      - ./dags:/app/airflow/dags
+      - ./logs:/app/airflow/logs
+      - ./plugins:/app/airflow/plugins
+      - ./start.sh:/app/start.sh
+    ports:
+      - "8080:8080"
+    command: ["/bin/bash", "-c", "/app/start.sh"]
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.API
+    container_name: api_container
+    ports:
+      - "5000:5000"

@@ -1,79 +1,107 @@
-name: workflow
+name: Continuous Deployment
 
 on:
   push:
     branches:
       - main
 
-permissions: 
-  id-token: write
-  contents: read
-
+env:
+  ECR_REPOSITORY_NAME_API: ffp_api
+  ECR_REPOSITORY_NAME_TB: flight_fare_prediction
+  AWS_DEFAULT_REGION: ap-south-1
+  AWS_ACCOUNT_ID: 206545088951
+  AWS_ECR_LOGIN_SERVER: 206545088951.dkr.ecr.ap-south-1.amazonaws.com
+  AWS_ECR_LOGIN_URI_API: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_API }}
+  AWS_ECR_LOGIN_URI_TB: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_TB }}
+  INSTANCE_API_IP: 3.111.23.154
+  INSTANCE_TB_IP: 13.232.56.72
 
 jobs:
- build-and-push-ecr-image:
-  name: Continuous Delivery
-  runs-on: ubuntu-latest
-  steps:
-   - name: Checkout Code
-     uses: actions/checkout@v3
-   - name: Install Utilities
-     run: |
+  build-and-push-ecr-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registry: ${{ env.AWS_ECR_LOGIN_SERVER }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Build and Push API Docker Image
+        env:
+          IMAGE_TAG: latest
+        run: |
+          docker build -t ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }} -f Dockerfile.API .
+          docker push ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }}
+
+      - name: Build and Push TB Docker Image
+        env:
+          IMAGE_TAG: latest
+        run: |
+          docker build -t ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }} -f Dockerfile.TB .
+          docker push ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }}
+
+  run-api-on-instance:
+    needs: build-and-push-ecr-images
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+          sudo apt-get update
+          sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Pull API Docker Image
+        run: |
+          sudo docker pull ${{ env.AWS_ECR_LOGIN_URI_API }}:latest
+
+      - name: Run API Docker Image
+        run: |
+          sudo docker run -d --name api -p 80:80 ${{ env.AWS_ECR_LOGIN_URI_API }}:latest
+
+  run-tb-on-instance:
+    needs: build-and-push-ecr-images
+    runs-on: self-hosted
+steps:
+  - name: Checkout Code
+    uses: actions/checkout@v2
+
+  - name: Install Docker
+    run: |
       sudo apt-get update
-      sudo apt-get install -y jq unzip
+      sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+      sudo apt-get update
+      sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 
-   - name: Configure AWS credentials
-     uses: aws-actions/configure-aws-credentials@v1
-     with:
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      aws-region: ${{ secrets.AWS_REGION }}
-
-   - name: Login to Amazon ECR
-     id: login-ecr
-     uses: aws-actions/amazon-ecr-login@v1
-    
-   - name: Build, tag, and push image to Amazon ECR
-     id: build-image
-     env:
-      ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-      ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
-      IMAGE_TAG: latest
-     run: |
-       # Build a docker container and
-       # push it to ECR so that it can
-       # be deployed to ECS.
-       docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-       echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" 
-
- Continuous-Deployment:
-  needs: build-and-push-ecr-image
-  runs-on: self-hosted
-  steps:
-  - name: Checkout
-    uses: actions/checkout@v3
-  
-  - name: Configure AWS credentials
+  - name: Configure AWS Credentials
     uses: aws-actions/configure-aws-credentials@v1
     with:
       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      aws-region: ${{ secrets.AWS_REGION }}
-  - name: Install Utilities
+      aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+  - name: Pull TB Docker Image
     run: |
-      sudo apt-get update
-      sudo apt-get install -y jq unzip
-  - name: Login to Amazon ECR
-    id: login-ecr
-    uses: aws-actions/amazon-ecr-login@v1
-    
-  - name: Pull docker image
+      sudo docker pull ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
+
+  - name: Run TB Docker Image
     run: |
-      docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
-  - name: Run Docker Image to serve users
-    run: |
-      export IMAGE_NAME="${{secrets.AWS_ECR_LOGIN_URI}}"/"${{ secrets.ECR_REPOSITORY_NAME }}":latest AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} BUCKET_NAME=${{ secrets.BUCKET_NAME}} "MONGO_DB_URL=${{ secrets.MONGO_DB_URL }}" && docker compose up -d
-  - name: Docker System Prune to Remove Old Images
-    run: |
-      docker system prune -f
+      sudo docker run -d --name tb -p 8080:8080 ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
