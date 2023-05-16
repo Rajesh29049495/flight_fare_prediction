@@ -15,6 +15,7 @@ jobs:
     env:
       AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
       AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
+      AWS_REGION: ap-south-1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -23,7 +24,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
         with:
-          region: ${{ secrets.AWS_REGION }}
+          region: ${{ env.AWS_REGION }}
           registry: ${{ secrets.AWS_ECR_LOGIN_SERVER }}
 
       - name: Build and Push API Docker Image
@@ -46,6 +47,7 @@ jobs:
     env:
       AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
       AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
+      AWS_REGION: ap-south-1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -64,7 +66,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Pull API Docker Image
         run: |
@@ -80,6 +82,7 @@ jobs:
     env:
       AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
       AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
+      AWS_REGION: ap-south-1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -98,7 +101,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Pull TB Docker Image
         run: |
