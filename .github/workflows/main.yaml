@@ -78,30 +78,30 @@ jobs:
   run-tb-on-instance:
     needs: build-and-push-ecr-images
     runs-on: self-hosted
-steps:
-  - name: Checkout Code
-    uses: actions/checkout@v2
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-  - name: Install Docker
-    run: |
-      sudo apt-get update
-      sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
-      curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-      sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-      sudo apt-get update
-      sudo apt-get install docker-ce docker-ce-cli containerd.io -y
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+          sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+          sudo apt-get update
+          sudo apt-get install docker-ce docker-ce-cli containerd.io -y
 
-  - name: Configure AWS Credentials
-    uses: aws-actions/configure-aws-credentials@v1
-    with:
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      aws-region: ${{ env.AWS_DEFAULT_REGION }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-  - name: Pull TB Docker Image
-    run: |
-      sudo docker pull ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
+      - name: Pull TB Docker Image
+        run: |
+          sudo docker pull ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
 
-  - name: Run TB Docker Image
-    run: |
-      sudo docker run -d --name tb -p 8080:8080 ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
+      - name: Run TB Docker Image
+        run: |
+          sudo docker run -d --name tb -p 8080:8080 ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
