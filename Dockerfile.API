@@ -1,18 +1,10 @@
 FROM python:3.8
-
-# Create a directory for the project
+USER root
 RUN mkdir /app
-WORKDIR /app
-
-# Copy the requirements file and install dependencies
-COPY requirements.txt /app/
-RUN pip install -r requirements.txt
-
-# Copy the entire project directory into the image
 COPY . /app/
-
+WORKDIR /app/
+RUN pip3 install -r requirements.txt
 # Expose port 5000 for the API
 EXPOSE 5000
-
 # Set the entrypoint command to start the API server
 CMD ["python", "API.py"]
