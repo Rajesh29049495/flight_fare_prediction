@@ -5,20 +5,19 @@ on:
     branches:
       - main
 
-env:
-  ECR_REPOSITORY_NAME_API: ffp_api
-  ECR_REPOSITORY_NAME_TB: flight_fare_prediction
-  AWS_DEFAULT_REGION: ap-south-1
-  AWS_ACCOUNT_ID: 206545088951
-  AWS_ECR_LOGIN_SERVER: 206545088951.dkr.ecr.ap-south-1.amazonaws.com
-  AWS_ECR_LOGIN_URI_API: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_API }}
-  AWS_ECR_LOGIN_URI_TB: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_TB }}
-  INSTANCE_API_IP: 3.111.23.154
-  INSTANCE_TB_IP: 13.232.56.72
-
 jobs:
   build-and-push-ecr-images:
     runs-on: ubuntu-latest
+    env:
+      ECR_REPOSITORY_NAME_API: ffp_api
+      ECR_REPOSITORY_NAME_TB: flight_fare_prediction
+      AWS_DEFAULT_REGION: ap-south-1
+      AWS_ACCOUNT_ID: 206545088951
+      AWS_ECR_LOGIN_SERVER: 206545088951.dkr.ecr.ap-south-1.amazonaws.com
+      AWS_ECR_LOGIN_URI_API: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_API }}
+      AWS_ECR_LOGIN_URI_TB: ${{ env.AWS_ECR_LOGIN_SERVER }}/${{ env.AWS_ACCOUNT_ID }}/${{ env.ECR_REPOSITORY_NAME_TB }}
+      INSTANCE_API_IP: 3.111.23.154
+      INSTANCE_TB_IP: 13.232.56.72
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
