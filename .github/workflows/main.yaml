@@ -37,18 +37,18 @@ jobs:
      uses: aws-actions/amazon-ecr-login@v1
     
    - name: Build and Push API Docker Image
-      env:
-        IMAGE_TAG: latest
-      run: |
-        docker build -t ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }} -f Dockerfile.API .
-        docker push ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }}
+     env:
+      IMAGE_TAG: latest
+     run: |
+      docker build -t ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }} -f Dockerfile.API .
+      docker push ${{ env.AWS_ECR_LOGIN_URI_API }}:${{ env.IMAGE_TAG }}
 
    - name: Build and Push TB Docker Image
-      env:
-        IMAGE_TAG: latest
-      run: |
-        docker build -t ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }} -f Dockerfile.TB .
-        docker push ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }}
+     env:
+      IMAGE_TAG: latest
+     run: |
+      docker build -t ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }} -f Dockerfile.TB .
+      docker push ${{ env.AWS_ECR_LOGIN_URI_TB }}:${{ env.IMAGE_TAG }}
       
  run-api-on-instance:
   needs: build-and-push-ecr-images
@@ -80,10 +80,6 @@ jobs:
     run: |
       sudo docker run -d --name api -p 80:80 ${{ env.AWS_ECR_LOGIN_URI_API }}:latest
 
-  - name: Docker System Prune to Remove Old Images
-    run: |
-      docker system prune -f
-
  run-tb-on-instance:
   needs: build-and-push-ecr-images
   runs-on: self-hosted
@@ -112,8 +108,4 @@ jobs:
 
   - name: Run TB Docker Image
     run: |
-      sudo docker run -d --name tb -p 8080:8080 ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
-
-  - name: Docker System Prune to Remove Old Images
-    run: |
-      docker system prune -f  
+      sudo docker run -d --name tb -p 8080:8080 ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest  
