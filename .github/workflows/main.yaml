@@ -22,10 +22,8 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          region: ${{ env.AWS_REGION }}
-          registry: ${{ secrets.AWS_ECR_LOGIN_SERVER }}
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ECR_LOGIN_SERVER }}
 
       - name: Build and Push API Docker Image
         env:
