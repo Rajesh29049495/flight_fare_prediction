@@ -74,9 +74,9 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Pull API Docker Image
+    - name: Pull docker image
       run: |
-        sudo docker pull ${{ env.AWS_ECR_LOGIN_URI_API }}:latest
+        docker pull ${{env.AWS_ECR_LOGIN_URI_API}}/${{ secrets.ECR_REPOSITORY_NAME_API }}:latest
 
     - name: Run API Docker Image
       run: |
@@ -105,9 +105,9 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Pull TB Docker Image
+    - name: Pull docker image
       run: |
-        sudo docker pull ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest
+        docker pull ${{env.AWS_ECR_LOGIN_URI_TB}}/${{ secrets.ECR_REPOSITORY_NAME_TB }}:latest
 
     - name: Run TB Docker Image
       run: |
