@@ -76,7 +76,7 @@ jobs:
 
     - name: Pull docker image
       run: |
-        docker pull ${{env.AWS_ECR_LOGIN_URI_API}}/${{ secrets.ECR_REPOSITORY_NAME_API }}:latest
+        docker pull ${{env.AWS_ECR_LOGIN_URI_API}}:latest
 
     - name: Run API Docker Image
       run: |
@@ -107,7 +107,7 @@ jobs:
 
     - name: Pull docker image
       run: |
-        docker pull ${{env.AWS_ECR_LOGIN_URI_TB}}/${{ secrets.ECR_REPOSITORY_NAME_TB }}:latest
+        docker pull ${{env.AWS_ECR_LOGIN_URI_TB}}:latest
 
     - name: Run TB Docker Image
       run: |
