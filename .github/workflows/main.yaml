@@ -27,7 +27,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -54,8 +54,6 @@ jobs:
   run-api-on-instance:
     needs: build-and-push-ecr-images
     runs-on: self-hosted-api
-    env:
-      AWS_ECR_LOGIN_URI_API: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_API }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -65,7 +63,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
     - name: Install Utilities
       run: |
         sudo apt-get update
@@ -76,17 +74,15 @@ jobs:
 
     - name: Pull docker image
       run: |
-        docker pull ${{env.AWS_ECR_LOGIN_URI_API}}:latest
+        docker pull ${{secrets.AWS_ECR_LOGIN_URI_API}}:latest
 
     - name: Run API Docker Image
       run: |
-        sudo docker run -d --name api -p 5000:5000 ${{ env.AWS_ECR_LOGIN_URI_API }}:latest
+        sudo docker run -d --name api -p 5000:5000 ${{ secrets.AWS_ECR_LOGIN_URI_API }}:latest
 
   run-tb-on-instance:
     needs: build-and-push-ecr-images
     runs-on: self-hosted
-    env:
-      AWS_ECR_LOGIN_URI_TB: ${{ secrets.AWS_ECR_LOGIN_SERVER }}/${{ secrets.AWS_ACCOUNT_ID }}/${{ secrets.ECR_REPOSITORY_NAME_TB }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -96,7 +92,7 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+        aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
     - name: Install Utilities
       run: |
         sudo apt-get update
@@ -107,8 +103,7 @@ jobs:
 
     - name: Pull docker image
       run: |
-        docker pull ${{env.AWS_ECR_LOGIN_URI_TB}}:latest
-
-    - name: Run TB Docker Image
+        docker pull ${{secrets.AWS_ECR_LOGIN_URI__TB}}:latest
+    - name: Run Docker Image to serve users
       run: |
-        sudo docker run -d --name tb -p 8080:8080 ${{ env.AWS_ECR_LOGIN_URI_TB }}:latest  
+        export IMAGE_NAME="${{secrets.AWS_ECR_LOGIN_URI_TB}}"/"${{ secrets.ECR_REPOSITORY_NAME_TB }}":latest AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" AWS_DEFAULT_REGION=${{ secrets.AWS_REGION }} BUCKET_NAME=${{ secrets.BUCKET_NAME}} "MONGO_DB_URL=${{ secrets.MONGO_DB_URL }}" && sudo docker run -d --name tb -p 80:80 ${{ secrets.AWS_ECR_LOGIN_URI_TB }}:latest
