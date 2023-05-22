@@ -53,7 +53,7 @@ jobs:
       
   run-api-on-instance:
     needs: build-and-push-ecr-images
-    runs-on: self-hosted-api
+    runs-on: self-hosted
     steps:
     - name: Checkout
       uses: actions/checkout@v3
