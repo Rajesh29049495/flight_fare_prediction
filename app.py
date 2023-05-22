@@ -38,7 +38,7 @@ Additional_Info_transformer = utils.load_object(Additional_Info_path)
 @app.route('/', methods=['GET'])
 @cross_origin()
 def home():
-    return render_template('home.html')
+    return render_template('index.html')
 
 @app.route('/predict_api', methods= ['POST'])
 @cross_origin()
@@ -90,13 +90,13 @@ def predict_api():
             output = flight_model.predict(final_input)[0]
             print(output)
 
-            return render_template('home.html', output_text="The Price of the fight is {}.".format(round(output,2)))
+            return render_template('index.html', output_text="The Price of the fight is {}.".format(round(output,2)))
 
         except Exception as e:
             raise ffpException(e,sys)
     
     else:
-        return render_template('home.html')
+        return render_template('index.html')
 
 if __name__=="__main__":
     try:
