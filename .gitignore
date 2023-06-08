@@ -7,7 +7,6 @@ artifact
 *.so
 prediction
 Prediction_Output
-saved_models
 demotest.py
 logs
 artifacts

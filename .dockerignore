@@ -1,7 +1,6 @@
 artifact
 logs
 notebook
-saved_models
 *.egg-info
 .env
 data_dump.py
