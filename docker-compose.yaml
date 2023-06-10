@@ -11,10 +11,6 @@ services:
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
       - MONGO_DB_URL=${MONGO_DB_URL}
       - BUCKET_NAME=${BUCKET_NAME}
-    volumes:
-      - ./dags:/app/airflow/dags
-      - ./logs:/app/airflow/logs
-      - ./start.sh:/app/start.sh
     ports:
       - "8080:8080"
     command: ["/bin/bash", "-c", "/app/start.sh"]
