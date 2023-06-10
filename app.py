@@ -101,8 +101,8 @@ def predict_api():
 if __name__=="__main__":
     try:
         #app.run(debug=True)                ##in some cases, depending on our operating system an dnetwork configuration, 'debug = True' may prevent external clienets from connecting to teh server , in which case using 'host="0.0.0.0" instead may resolve the issue.
-        #app.run(host="0.0.0.0")
-        app.run(host="0.0.0.0", port=8080)
+        app.run(host="0.0.0.0")
+        #app.run(host="0.0.0.0", port=8080)
 
     except Exception as e:
        raise ffpException(e, sys)

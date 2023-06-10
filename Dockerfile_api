@@ -1,0 +1,10 @@
+FROM python:3.8
+USER root
+RUN mkdir /app
+COPY . /app/
+WORKDIR /app/
+RUN pip3 install -r requirements.txt
+# Expose port 5000 for the API
+EXPOSE 5000
+# Set the entrypoint command to start the API server
+CMD ["python", "app.py"]
